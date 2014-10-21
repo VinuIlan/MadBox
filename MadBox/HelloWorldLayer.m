@@ -9,9 +9,18 @@
 
 // Import the interfaces
 #import "HelloWorldLayer.h"
+#import "MainGame.h"
+#import "HowTo.h"
+#import "Objectives.h"
+#import "Stats.h"
+#import "About.h"
 
 // Needed to obtain the Navigation Controller
 #import "AppDelegate.h"
+
+CCSprite *mainTitle;
+CCSprite *mainBackground;
+CCSprite *mainBackground2;
 
 #pragma mark - HelloWorldLayer
 
@@ -41,67 +50,115 @@
 	// Apple recommends to re-assign "self" with the "super's" return value
 	if( (self=[super init]) ) {
 		
-		// create and initialize a Label
-		CCLabelTTF *label = [CCLabelTTF labelWithString:@"Hello World" fontName:@"Marker Felt" fontSize:64];
-
-		// ask director for the window size
-		CGSize size = [[CCDirector sharedDirector] winSize];
-	
-		// position the label on the center of the screen
-		label.position =  ccp( size.width /2 , size.height/2 );
-		
-		// add the label as a child to this Layer
-		[self addChild: label];
-		
-		
-		
-		//
-		// Leaderboards and Achievements
-		//
-		
-		// Default font size will be 28 points.
-		[CCMenuItemFont setFontSize:28];
-		
-		// Achievement Menu Item using blocks
-		CCMenuItem *itemAchievement = [CCMenuItemFont itemWithString:@"Achievements" block:^(id sender) {
-			
-			
-			GKAchievementViewController *achivementViewController = [[GKAchievementViewController alloc] init];
-			achivementViewController.achievementDelegate = self;
-			
-			AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
-			
-			[[app navController] presentModalViewController:achivementViewController animated:YES];
-			
-			[achivementViewController release];
-		}
-									   ];
-
-		// Leaderboard Menu Item using blocks
-		CCMenuItem *itemLeaderboard = [CCMenuItemFont itemWithString:@"Leaderboard" block:^(id sender) {
-			
-			
-			GKLeaderboardViewController *leaderboardViewController = [[GKLeaderboardViewController alloc] init];
-			leaderboardViewController.leaderboardDelegate = self;
-			
-			AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
-			
-			[[app navController] presentModalViewController:leaderboardViewController animated:YES];
-			
-			[leaderboardViewController release];
-		}
-									   ];
-		
-		CCMenu *menu = [CCMenu menuWithItems:itemAchievement, itemLeaderboard, nil];
-		
-		[menu alignItemsHorizontallyWithPadding:20];
-		[menu setPosition:ccp( size.width/2, size.height/2 - 50)];
-		
-		// Add the menu to the layer
-		[self addChild:menu];
-
+        mainBackground = [CCSprite spriteWithFile:@"MovingBackground.png"];
+        mainBackground.position = ccp(160, 1440);
+        [self addChild:mainBackground];
+        
+        mainBackground2 = [CCSprite spriteWithFile:@"MovingBackground.png"];
+        mainBackground2.position = ccp(160, 4320);
+        [self addChild:mainBackground2];
+        
+        mainTitle = [CCSprite spriteWithFile:@"Title3.png"];
+        mainTitle.position = ccp(160, 520);
+        [self addChild:mainTitle];
+        
+		CCMenuItemImage *playB = [CCMenuItemImage itemWithNormalImage:@"Play Button 2.png" selectedImage:@"Play Button 2 Pressed.png" target:self selector:@selector(gotoGame:)];
+        //playB.position = ccp(0, -95);
+        playB.position = ccp(0, -300);
+        
+        CCMenuItemImage *howtoB = [CCMenuItemImage itemWithNormalImage:@"How To Button.png" selectedImage:@"How To Button Pressed.png" target:self selector:@selector(gotoHowto:)];
+        //howtoB.position = ccp(-80, -165);
+        howtoB.position = ccp(-80, -300);
+        
+        CCMenuItemImage *objectivesB = [CCMenuItemImage itemWithNormalImage:@"Objectives Button.png" selectedImage:@"Objectives Button Pressed.png" target:self selector:@selector(gotoObjectives:)];
+        //objectivesB.position = ccp(80, -165);
+        objectivesB.position = ccp(80, -300);
+        
+        CCMenuItemImage *statsB = [CCMenuItemImage itemWithNormalImage:@"Stats Button.png" selectedImage:@"Stats Button Pressed.png" target:self selector:@selector(gotoStats:)];
+        //statsB.position = ccp(-80, -210);
+        statsB.position = ccp(-80, -300);
+        
+        CCMenuItemImage *aboutB = [CCMenuItemImage itemWithNormalImage:@"About Button.png" selectedImage:@"About Button Pressed.png" target:self selector:@selector(gotoAbout:)];
+        //aboutB.position = ccp(80, -210);
+        aboutB.position = ccp(80, -300);
+        
+        CCMenu *menu = [CCMenu menuWithItems:playB, howtoB, objectivesB, statsB, aboutB, nil];
+        
+        [self addChild:menu];
+        
+        double time = 1.0;
+        id delay = [CCDelayTime actionWithDuration: time];
+        double time2 = 0.2;
+        id delay2 = [CCDelayTime actionWithDuration: time2];
+        
+        id moveDown = [CCMoveTo actionWithDuration:0.2 position:ccp(160, 420)];
+        id jumpDown = [CCJumpBy actionWithDuration:0.2 position:ccp(0, 0) height:-25 jumps:1];
+        id jumpUp = [CCJumpBy actionWithDuration:0.2 position:ccp(0, 0) height:25 jumps:1];
+        id moveUpPlay = [CCMoveTo actionWithDuration:0.2 position:ccp(0, -95)];
+        id moveUpHow = [CCMoveTo actionWithDuration:0.2 position:ccp(-80, -165)];
+        id moveUpObjectives = [CCMoveTo actionWithDuration:0.2 position:ccp(80, -165)];
+        id moveUpStats = [CCMoveTo actionWithDuration:0.2 position:ccp(-80, -210)];
+        id moveUpAbout = [CCMoveTo actionWithDuration:0.2 position:ccp(80, -210)];
+        
+        id sequenceTitle = [CCSequence actions: delay, moveDown, jumpDown, nil];
+        id sequencePlay = [CCSequence actions: delay, moveUpPlay, jumpUp, nil];
+        id sequenceHow = [CCSequence actions: delay, delay2, moveUpHow, jumpUp, nil];
+        id sequenceObjectives = [CCSequence actions: delay, delay2, delay2, moveUpObjectives, jumpUp, nil];
+        id sequenceStats = [CCSequence actions: delay, delay2, delay2, delay2, moveUpStats, jumpUp, nil];
+        id sequenceAbout = [CCSequence actions: delay, delay2, delay2, delay2, delay2, moveUpAbout, jumpUp, nil];
+        
+        [mainTitle runAction:sequenceTitle];
+        [playB runAction:sequencePlay];
+        [howtoB runAction:sequenceHow];
+        [objectivesB runAction:sequenceObjectives];
+        [statsB runAction:sequenceStats];
+        [aboutB runAction:sequenceAbout];
+        
 	}
 	return self;
+}
+
+
+-(void) onEnter
+{
+    // Called right after a node's init method is called.
+    // If using a CCTransitionScene: called when the transition begins.
+    
+    [self schedule:@selector(callEveryFrame:)];
+    
+    [super onEnter];
+}
+
+
+-(void) callEveryFrame:(ccTime)dt{
+    mainBackground.position = ccp(160, mainBackground.position.y - 50*dt);
+    mainBackground2.position = ccp(160, mainBackground2.position.y - 50*dt);
+    if (mainBackground.position.y < -1440) {
+        mainBackground.position = ccp(mainBackground.position.x, mainBackground.position.y + 5760);
+    }
+    if (mainBackground2.position.y < -1440) {
+        mainBackground2.position = ccp(mainBackground2.position.x, mainBackground2.position.y + 5760);
+    }
+}
+
+-(void)gotoGame:(id)sender{
+    [[CCDirector sharedDirector]replaceScene:[CCTransitionFade transitionWithDuration:0.5 scene:[MainGame node] withColor:ccWHITE]];
+}
+
+-(void)gotoHowto:(id)sender{
+    [[CCDirector sharedDirector]replaceScene:[CCTransitionFade transitionWithDuration:0.5 scene:[HowTo node] withColor:ccWHITE]];
+}
+
+-(void)gotoObjectives:(id)sender{
+    [[CCDirector sharedDirector]replaceScene:[CCTransitionFade transitionWithDuration:0.5 scene:[Objectives node] withColor:ccWHITE]];
+}
+
+-(void)gotoStats:(id)sender{
+    [[CCDirector sharedDirector]replaceScene:[CCTransitionFade transitionWithDuration:0.5 scene:[Stats node] withColor:ccWHITE]];
+}
+
+-(void)gotoAbout:(id)sender{
+    [[CCDirector sharedDirector]replaceScene:[CCTransitionFade transitionWithDuration:0.5 scene:[About node] withColor:ccWHITE]];
 }
 
 // on "dealloc" you need to release all your retained objects
